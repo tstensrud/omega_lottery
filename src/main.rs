@@ -1,42 +1,62 @@
-use std::io::{self, Write};
-
-
+use std::{fmt::LowerExp, io::{self, Write}};
 mod ticket_operations;
+mod user_operations;
 
 fn main() {
-    let mut running: bool = true;
-    let max_numbers: i8 = 42;
-    let mut count = 0;
+    let running: bool = true;    
+    let mut users: Vec<user_operations::User> = vec![];
     
     while running {
-        read_and_handle();
-        println!("{}", count);
-        count += 1;
-        if count > 3 {
-            running = false;
+        
+        println!("[N]ew user. [D]raw row. [P]rint users.");
+        print!("> ");
+        io::stdout().flush().expect("Failed to flush stdout");
+    
+        let mut buffer: String = String::new();
+        match io::stdin().read_line(&mut buffer) {
+            Ok(n) => { 
+                match buffer.to_lowercase().trim() {
+                    "d" => {
+                        let row: [u8;8] = ticket_operations::new_row(40);
+                        for number in row {
+                            print!("{} -", number);
+                        }
+                        println!("");
+                    },
+                    "n" => {
+                        let mut name: String = String::new();
+                        let mut age: String = String::new();
+                        let mut email: String = String::new();
+                        
+                        println!("Name: ");
+                        io::stdin().read_line(&mut name);
+                        println!("Age: ");
+                        io::stdin().read_line(&mut age);
+                        println!("Email: ");
+                        io::stdin().read_line(&mut email);
+                        users.push(user_operations::new_user(name, email, age));
+                        println!("New user created");
+                    },
+                    "p" => {
+                        if users.len() > 0 {
+                            for user in &users {
+                            
+                                println!("Name: {}", user.get_name());
+                                println!("Age: {}", user.get_age());
+                                println!("E-mail: {}", user.get_email());
+                                println!("");
+                            }    
+                        }
+                        else {
+                            println!("No users registered");
+                        }
+                    }
+                    _ => println!("Unknown command"),
+                }
+             }
+            Err(e)=> { println!("{e}") },
         }
 
-    }
-
-    let mut row_of_numbers = ticket_operations::new_row(max_numbers);
-    for (i, num) in row_of_numbers.iter().enumerate() {
-        if i == row_of_numbers.len() - 1 {
-            print!(" {}", num);    
-        }
-        else {
-            print!("{} -", num);
-        }
-    }
-}
-
-fn read_and_handle() {
-    print!("Write something: ");
-    io::stdout().flush().expect("Failed to flush stdout");
-
-    let mut buffer: String = String::new();
-    match io::stdin().read_line(&mut buffer) {
-        Ok(n) => { println!("You said: {}", buffer.trim()); }
-        Err(e)=> { println!("{e}") },
     }
 }
 
