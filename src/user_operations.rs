@@ -20,7 +20,11 @@ impl User {
 }
 
 pub fn new_user(name: String, email: String, age: String) -> User {
-    let age_parsed = age.trim().parse().unwrap();
-    let user = User{name: name, email: email, age: age_parsed};
+    let user = User{name: name, email: email, 
+        age: match age.trim().parse().ok() {
+                Some(val) => val,
+                None => 0
+            }
+        };
     return user;
 }
